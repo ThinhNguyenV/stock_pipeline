@@ -6,7 +6,7 @@
 
 This project is an advanced Data Engineering portfolio piece that implements a robust **Extract, Transform, Load (ETL)** pipeline orchestrated by **Apache Airflow** and containerized using **Docker**. It fetches real-world stock market data, processes it, and loads the results into a structured database.
 
-This setup demonstrates key skills for a Mid-level Data Engineer:
+This setup demonstrates key skills for a Junior-level Data Engineer:
 *   **Orchestration:** Defining complex workflows and dependencies using Airflow DAGs.
 *   **Containerization:** Managing a multi-service application (Airflow, Postgres) with Docker Compose.
 *   **Data Processing:** Using `pandas` to calculate a key financial indicator (Simple Moving Average - SMA).
