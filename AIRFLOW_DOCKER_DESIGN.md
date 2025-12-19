@@ -9,7 +9,7 @@ To transform the existing Python-based ETL pipeline into a production-ready, con
 *   **Database:** PostgreSQL (Airflow Metadata), SQLite (Data Warehouse - kept for simplicity, but easily swapped for a containerized Postgres/MySQL)
 *   **ETL Code:** Python, Pandas, yfinance
 
-## 3. New Directory Structure
+## 3. Directory Structure
 
 The project structure will be modified to accommodate Airflow's requirements:
 
