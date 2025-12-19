@@ -3,7 +3,7 @@
 ## 1. Upgrade Goal
 To transform the existing Python-based ETL pipeline into a production-ready, containerized solution using **Apache Airflow** for orchestration and **Docker** for environment management. This demonstrates advanced Data Engineering skills in deployment, scheduling, and dependency management.
 
-## 2. New Technology Stack
+## 2. Technology Stack
 *   **Orchestration:** Apache Airflow (via Docker Compose)
 *   **Containerization:** Docker, Docker Compose
 *   **Database:** PostgreSQL (Airflow Metadata), SQLite (Data Warehouse - kept for simplicity, but easily swapped for a containerized Postgres/MySQL)
