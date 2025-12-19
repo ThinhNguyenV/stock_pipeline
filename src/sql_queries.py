@@ -33,13 +33,11 @@ CREATE TABLE IF NOT EXISTS dim_products (
 
 # --- Data Ingestion & Transformation Queries ---
 
-# Postgres dùng %s thay vì ? làm placeholder
 INSERT_RAW_TRANSACTION = """
 INSERT INTO raw_transactions (transaction_id, user_id, product_id, quantity, price, timestamp)
 VALUES (%s, %s, %s, %s, %s, %s);
 """
 
-# Postgres dùng ON CONFLICT thay cho INSERT OR IGNORE
 INSERT_DIM_USER = """
 INSERT INTO dim_users (user_id, name, email, registration_date)
 VALUES (%s, %s, %s, %s)

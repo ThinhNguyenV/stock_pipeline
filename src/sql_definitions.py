@@ -1,6 +1,4 @@
 # --- Database Connection Info (Dùng cho Postgres) ---
-# Trong Docker, DB_PATH không còn là đường dẫn file .db nữa
-# Bạn sẽ dùng Connection String: postgresql+psycopg2://airflow:airflow@postgres/airflow
 
 # --- DDL: Create Raw Stock Data Table ---
 CREATE_RAW_STOCK_TABLE = """
@@ -35,7 +33,6 @@ ALL_CREATE_QUERIES = [
 ]
 
 # --- DML: Insert Raw Data ---
-# Postgres dùng %s làm placeholder và ON CONFLICT để thay thế INSERT OR REPLACE
 INSERT_RAW_STOCK_DATA = """
 INSERT INTO raw_stock_data ("Date", "Ticker", "Open", "High", "Low", "Close", "Volume")
 VALUES (%s, %s, %s, %s, %s, %s, %s)
