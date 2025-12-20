@@ -7,13 +7,13 @@ CREATE TABLE IF NOT EXISTS raw_transactions (
     product_id TEXT,
     quantity INTEGER,
     price REAL,
-    timestamp TIMESTAMP -- Postgres dùng TIMESTAMP thay vì TEXT cho thời gian
+    timestamp TIMESTAMP 
 );
 """
 
 CREATE_DIM_USERS_TABLE = """
 CREATE TABLE IF NOT EXISTS dim_users (
-    user_key SERIAL PRIMARY KEY, -- SERIAL thay cho INTEGER PRIMARY KEY AUTOINCREMENT
+    user_key SERIAL PRIMARY KEY, 
     user_id TEXT UNIQUE,
     name TEXT,
     email TEXT,
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS dim_users (
 
 CREATE_DIM_PRODUCTS_TABLE = """
 CREATE TABLE IF NOT EXISTS dim_products (
-    product_key SERIAL PRIMARY KEY, -- SERIAL thay cho AUTOINCREMENT
+    product_key SERIAL PRIMARY KEY, 
     product_id TEXT UNIQUE,
     name TEXT,
     category TEXT,
