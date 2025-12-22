@@ -1,48 +1,39 @@
-# Stock Price Analysis Pipeline: Junior Data Engineer Portfolio Project
-
-# Stock Price Analysis Pipeline: Airflow & Docker Orchestration
+# Advanced Data Platform: Cassandra, Streamlit, Prometheus, Airflow & Docker
 
 ## Project Overview
 
-This project is an advanced Data Engineering portfolio piece that implements a robust **Extract, Transform, Load (ETL)** pipeline orchestrated by **Apache Airflow** and containerized using **Docker**. It fetches real-world stock market data, processes it, and loads the results into a structured database.
+This project is a **full-stack Data Platform** demonstrating advanced Data Engineering and DevOps skills. It transforms the stock price ETL pipeline into a robust, multi-service architecture using modern, distributed technologies.
 
-This setup demonstrates key skills for a Junior-level Data Engineer:
-*   **Orchestration:** Defining complex workflows and dependencies using Airflow DAGs.
-*   **Containerization:** Managing a multi-service application (Airflow, Postgres) with Docker Compose.
-*   **Data Processing:** Using `pandas` to calculate a key financial indicator (Simple Moving Average - SMA).
-*   **Data Sourcing:** Interacting with external APIs (`yfinance`).
+### Key Features Demonstrated:
+
+*   **Real-time Data Serving:** Migrated from SQLite to **Apache Cassandra** (NoSQL, distributed database) for time-series data storage.
+*   **Interactive Visualization:** Added a **Streamlit** application to query Cassandra and display stock price charts and Moving Averages.
+*   **Observability/Monitoring:** Integrated **Prometheus** and **Grafana** to monitor the health and performance of the Docker containers.
+*   **Orchestration:** **Apache Airflow** schedules the ELT (Extract, Load, Transform) process.
+*   **Containerization:** **Docker Compose** manages all 7 services (Airflow, Postgres, Cassandra, Streamlit, Prometheus, Grafana).
 
 ## Technical Stack
 
-| Component | Technology | Purpose |
+| Component | Technology | Role |
 | :--- | :--- | :--- |
-| **Orchestration** | **Apache Airflow** | Schedules, monitors, and manages the ETL workflow. |
-| **Containerization** | **Docker & Docker Compose** | Packages the application and sets up the multi-service environment. |
-| **Language** | Python 3.12+ | Core programming language for ETL logic. |
-| **Data Source** | `yfinance` | Fetches historical stock price data from Yahoo! Finance. |
-| **Data Processing** | `pandas` | Used for data cleaning, transformation, and calculating SMAs. |
-| **Data Storage** | SQLite | LightIight, file-based database for the data warehouse (persisted via Docker Volume). |
-| **Airflow Metadata** | PostgreSQL | Database used by Airflow to store DAG run history, task states, etc. |
+| **Orchestration** | Apache Airflow | Schedules the ELT workflow. |
+| **Data Storage** | **Apache Cassandra** | High-availability, time-series NoSQL database. |
+| **Visualization** | **Streamlit** | Interactive web application for data display. |
+| **Monitoring** | **Prometheus** | Collects metrics from all services. |
+| **Dashboard** | **Grafana** | Visualizes monitoring metrics (from Prometheus) and potentially data (from Cassandra). |
+| **ETL Logic** | Python, Pandas, yfinance | Core data processing. |
+| **Containerization** | Docker & Docker Compose | Manages the multi-service environment. |
 
-## Data Model
+## Pipeline Flow (ELT with Cassandra)
 
-The pipeline uses a simple relational model with two tables:
+The ETL process is defined in the `dags/stock_etl_dag.py` file:
 
-| Table Name | Description | Key Columns |
-| :--- | :--- | :--- |
-| `raw_stock_data` | Stores the raw, historical daily stock data directly from the API. | `Date`, `Ticker` (Composite Primary Key) |
-| `analyzed_stock_data` | Stores the processed data, including calculated technical indicators (`SMA_50`, `SMA_200`). | `Date`, `Ticker` (Composite Primary Key) |
+1.  **`initialize_cassandra_schema`**: Creates the Cassandra Keyspace and the `stock_prices` table.
+2.  **`extract_data_from_yfinance`**: Fetches raw data from `yfinance` and passes it as a Pandas DataFrame via XCom.
+3.  **`transform_data_calculate_sma`**: Calculates the 50-day and 200-day SMAs on the DataFrame (from XCom).
+4.  **`load_analyzed_data_to_cassandra`**: Loads the final, transformed data into the Cassandra `stock_prices` table.
 
-## Pipeline Flow (Airflow DAG)
-
-The ETL process is defined in the `dags/stock_etl_dag.py` file as a Directed Acyclic Graph (DAG) with the following sequence:
-
-1.  **`initialize_database`**: Ensures the SQLite database file and tables exist.
-2.  **`extract_and_load_raw_data`**: Fetches data from `yfinance` and loads it into the `raw_stock_data` table.
-3.  **`transform_data_calculate_sma`**: Reads raw data, calculates the 50-day and 200-day SMAs.
-4.  **`load_analyzed_data`**: Loads the transformed data into the `analyzed_stock_data` table.
-
-## Setup and Execution (Docker)
+## Setup and Execution
 
 ### Prerequisites
 
@@ -51,7 +42,7 @@ The ETL process is defined in the `dags/stock_etl_dag.py` file as a Directed Acy
 
 ### 1. Build the Custom Airflow Image
 
-Navigate to the project root directory and build the custom Docker image. This image includes Airflow and all necessary Python dependencies (`pandas`, `yfinance`).
+Navigate to the project root directory and build the custom Docker image. This image includes Airflow and all necessary Python dependencies (`pandas`, `yfinance`, `cassandra-driver`, `streamlit`).
 
 ```bash
 docker-compose build
@@ -65,42 +56,53 @@ Before starting the services, the Airflow metadata database needs to be initiali
 docker-compose up airflow-init
 ```
 
-### 3. Start the Airflow Environment
+### 3. Start the Full Environment
 
-Start the Ibserver, Scheduler, and PostgreSQL services in detached mode.
+Start all 7 services (Postgres, Cassandra, Airflow Webserver, Scheduler, Streamlit, Prometheus, Grafana) in detached mode.
 
 ```bash
 docker-compose up -d
 ```
 
-### 4. Access Airflow UI
+### 4. Access Services
 
-*   Open your Ib browser and navigate to: `http://localhost:8080`
-*   **Default Credentials:** `airflow` / `airflow`
+| Service | URL | Credentials |
+| :--- | :--- | :--- |
+| **Airflow UI** | `http://localhost:8080` | `airflow` / `airflow` |
+| **Streamlit App** | `http://localhost:8501` | N/A |
+| **Prometheus UI** | `http://localhost:9090` | N/A |
+| **Grafana UI** | `http://localhost:3000` | `admin` / `admin` (will prompt for new password) |
 
-### 5. Run the Pipeline
+### 5. Run the Pipeline (Airflow)
 
-1.  In the Airflow UI, find the DAG named **`stock_price_etl_pipeline`**.
-2.  Toggle the DAG to **ON** (if not already).
-3.  Click the **Trigger DAG** button (play icon) to start a manual run.
-4.  Monitor the progress in the **Graph View** or **Gantt Chart** until all tasks turn green.
+1.  Access the **Airflow UI** (`http://localhost:8080`).
+2.  Find the DAG named **`stock_price_etl_pipeline`**.
+3.  Toggle the DAG to **ON**.
+4.  Click the **Trigger DAG** button to start the ELT process.
+5.  Monitor the tasks until they complete successfully, loading data into Cassandra.
 
-### 6. Stop the Environment
+### 6. View Visualization (Streamlit)
 
-To stop and remove the containers (but keep the persistent data):
+1.  Access the **Streamlit App** (`http://localhost:8501`).
+2.  Select a Ticker from the sidebar.
+3.  The chart will display the historical stock price and the calculated Moving Averages, querying the data directly from the Cassandra container.
+
+### 7. Monitor Health (Prometheus/Grafana)
+
+1.  Access the **Grafana UI** (`http://localhost:3000`).
+2.  Configure a Prometheus data source pointing to `http://prometheus:9090`.
+3.  Import a pre-built Docker/cAdvisor dashboard (e.g., ID 14285) to visualize the health of all running containers.
+
+### 8. Stop the Environment
+
+To stop and remove the containers:
 
 ```bash
 docker-compose down
 ```
 
-To stop and remove everything (including persistent data):
-
-```bash
-docker-compose down --volumes
-```
-
 ## Future Enhancements
 
-*   **Cloud Integration:** Migrate the SQLite data warehouse to a cloud-native solution like **Snowflake** or **BigQuery**.
-*   **Data Quality:** Integrate a data quality framework like **Great Expectations** as a dedicated Airflow task.
-*   **Notifications:** Add tasks to send success/failure notifications (e.g., via Slack or email).
+*   **Cloud Deployment:** See the attached `CLOUD_DEPLOYMENT_GUIDE.md` for instructions on deploying this architecture to AWS or GCP.
+*   **Data Quality:** Integrate Great Expectations as a dedicated Airflow task.
+*   **Real-time Streaming:** Replace `yfinance` with a Kafka producer/consumer setup to simulate true real-time data ingestion.
